@@ -91,7 +91,3 @@ class AdjBrownian(object):
 
         self.x = np.zeros(self.N, dtype=self.dtype)
         self.y = np.zeros(self.N, dtype=self.dtype)
-        
-def PDF(x,y,t,l,dt):
-    D = l*l/4.0/dt
-    return ( -(x*x+y*y)/4.0/np.pi/D/D/t + (x*x+y*y)**2/16.0/np.pi/D/D/D/t/t )*np.exp(-(x*x+y*y)/4.0/D/t)*l/2.0/dt

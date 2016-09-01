@@ -1,0 +1,314 @@
+\documentclass[11pt]{article}
+
+\usepackage[dvips]{graphicx}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{psfrag}
+\usepackage{amsmath,amssymb,rotating,dcolumn,texdraw,tabularx,colordvi}
+\usepackage[usenames]{color}
+\usepackage[nooneline,tight,raggedright]{subfigure}
+\usepackage{amsthm}
+
+\usepackage{wrapfig}
+\usepackage{pstricks,enumerate}
+
+\usepackage[font=footnotesize,format=plain,labelfont=bf]{caption}
+
+\usepackage{hyperref}
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{ref.bib}
+
+\usepackage{tikz,pgfplots,tkz-linknodes}
+\usetikzlibrary{fit}
+\newcommand{\fdstl}[4]{%
+    % shade the critical region tail
+    \addplot[line width=1.0pt,blue,domain=#1:3.5, no markers,samples=100] {#4*(x^(0.5*#2-1))*((1+#2*x/#3)^(-0.5*#2-0.5*#3))};
+}
+\newcommand{\fdsth}[4]{%
+    % shade the critical region tail
+    \addplot[fill=gray!50,domain=#1:3.5, no markers,samples=17,ybar] {#4*(x^(0.5*#2-1))*((1+#2*x/#3)^(-0.5*#2-0.5*#3))};
+}
+\newcommand{\textbox}[6]{
+	\node[rectangle,draw,fit={(#1-#3/2,#2-#4/2) (#1+#3/2,#2+#4/2)}] (#6) at (#1,#2) {#5}
+}
+
+%\captionsetup{labelfont={color=Brown,bf},textfont={color=BurntOrange}}
+
+\definecolor{myTan}{rgb}{.7,0.4,.15}
+\captionsetup{labelfont={color=brown,bf},textfont={color=myTan}}
+
+\newcommand{\entry}[1]{\mbox{\sffamily\bfseries{#1:}}\hfil}%
+
+\setlength{\marginparwidth}{.65in}
+\def\margcomment#1{\Red{$\bullet$}\marginpar{\raggedright \Red{\tiny #1}}}
+
+\makeatletter
+\renewcommand{\section}{\@startsection
+{section}%
+{0}%
+{0mm}%
+{-0.35\baselineskip}%
+{0.01\baselineskip}%
+{\normalfont\Large\bfseries\color{brown}}}%
+\makeatother
+
+\makeatletter
+\renewcommand{\subsection}{\@startsection
+{subsection}%
+{1}%
+{0mm}%
+{-0.35\baselineskip}%
+{0.1\baselineskip}%
+{\normalfont\large\bfseries\color{brown}}}%
+\makeatother
+
+
+\makeatletter
+\renewcommand{\subsubsection}{\@startsection
+{subsubsection}%
+{1}%
+{0mm}%
+{-0.5\baselineskip}%
+{0.3\baselineskip}%
+{\normalfont\normalsize\itshape\centering\color{brown}}}%
+\makeatother
+
+%\renewcommand{\topfraction}{0.0}
+\renewcommand{\textfraction}{0.0}
+\renewcommand{\floatpagefraction}{0.7}
+
+
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\footskip}{0.30in}
+\setlength{\textheight}{9.0in}
+\setlength{\headheight}{0.2in}
+\setlength{\headsep}{0.3in}
+
+\def\Dpartial#1#2{ \frac{\partial #1}{\partial #2} }
+\def\Dparttwo#1#2{ \frac{\partial^2 #1 }{ \partial #2^2} }
+\def\Dpartpart#1#2#3{ \frac{\partial^2 #1}{ \partial #2 \partial #3} }
+\def\Dnorm#1#2{ \frac{d #1 }{ d #2} }
+\def\Dnormtwo#1#2{ \frac{d^2 #1}{  d #2 ^2} }
+\def\Dtotal#1#2{ \frac{D #1 }{ D #2} }
+\def\Del#1#2{ \frac{\delta #1}{\delta #2} }
+\def\Var#1{\Dnorm{}{\epsilon} #1 \bigg|_{\epsilon=0}}
+
+\def\eps{\varepsilon}
+
+\newcommand{\vn}{\vec{n}}
+\newcommand{\vx}{\vec{x}}
+\newcommand{\xp}{\vec{x}_p}
+\newcommand{\Es}{E^*}
+\newcommand{\phis}{\phi^*}
+\newcommand{\Dx}{\Delta x}
+\newcommand{\Dt}{\Delta t}
+
+\newcommand{\vph}{\hat{v}_p}
+\newcommand{\xph}{\hat{x}_p}
+\newcommand{\Eh}{\hat{E}}
+\newcommand{\phih}{\hat{\phi}}
+
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cJ}{\mathcal{J}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cD}{\mathcal{D}}
+
+\newcommand{\timesum}{\sum\limits_{n=0}^{N_t-1}}
+\newcommand{\particlesum}{\sum\limits_{p=1}^{N}}
+\newcommand{\meshsum}{\sum\limits_{i=1}^{N_g}}
+
+\newcommand{\bxi}{\boldsymbol{\xi}}
+
+\newcommand{\bbK}{\hat{\mathbb{K}}}
+
+\newcommand{\myint}{\int_0^{T}\sum\limits_{p=1}^N}
+\newcommand{\mysum}{\sum\limits_{p=1}^N\int_0^{T}}
+\newcommand{\myiint}{\int_0^{T}\int_0^L}
+\newcommand{\dt}{\; dt}
+
+\def\bdash{\hbox{\drawline{4}{.5}\spacce{2}}}
+\def\spacce#1{\hskip #1pt}
+\def\drawline#1#2{\raise 2.5pt\vAox{\hrule width #1pt height #2pt}}
+\def\dashed{\bdash\bdash\bdash\bdash\nobreak\ }
+\def\solid{\drawline{24}{.5}\nobreak\ }
+\def\square{${\vcenter{\hrule height .4pt 
+              \hbox{\vrule width .4pt height 3pt \kern 3pt \vrule width .4pt}
+          \hrule height .4pt}}$\nobreak\ }
+\def\solidsquare{${\vcenter{\hrule height 3pt width 3pt}}$\nobreak\ }
+
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+ \renewcommand{\topfraction}{0.9}
+    \renewcommand{\bottomfraction}{0.8}	
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     % 2 may work better
+    \setcounter{dbltopnumber}{2}    % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+
+\setlength{\parindent}{0.25in}
+\setlength{\parskip}{2.0ex}
+
+\newtheorem*{remark}{Remark}
+
+\title{Adjoint-particle formulation for 2D Brownian motion}
+\author{Seung Whan Chung}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle
+
+\subsection*{Goal}
+Brownian motion is essentially stochastic, but when we fix the random seed the numerical simulation can be pseudo-deterministic, not exhibiting chaos.
+Adjoint-particle formulation for such dynamics can be a good practice, a good starting point to define adjoint-particle formulation.
+
+\subsection*{Governing equation}
+\begin{itemize}
+\item Equation of motion (Stochastic ODE)
+\begin{equation}
+\begin{split}
+\frac{\xp^n - \xp^{n-1}}{\Dt} &= l\cdot\xi(\vn)\\
+\xp^0 &= \vec{0}
+\end{split}
+\end{equation}
+where $\xi(\vn)$ is the uniformly-random normal vector in 2D space.
+\item Equation of probabilistic distribution (2D PDE)
+\begin{equation}
+\begin{split}
+\Dpartial{p}{t}(\vx,t) &= D\nabla^2p(\vx,t)\\
+D &= \frac{l^2}{4\Dt}\\
+p(\vx,t=0) &= \delta(\vx)
+\end{split}
+\end{equation}
+\end{itemize}
+
+\subsection*{Deriviation of PDE from ODE}
+In short, unlike the thought that we discretize PDE with particles,
+usually PDEs are derived from equations of particles with truncation error.
+In fact there is a difference in points of view:
+One can see this as truncation error, while the other can see this as smoothing, coarse-graining.\\
+The probability of a particle being at the position $\vx$ at time $t$ can be calculated using conditional probability:
+\begin{equation}
+\begin{split}
+p(\vx,t) &= \int d\vn\; \frac{1}{2\pi}\cdot p(\vx - l\vn, t-\Dt)\\
+&= \int \frac{d\vn}{2\pi} \left[ p(\vx,t) - l\vn\cdot\nabla p + \frac{l^2}{2}n_in_j\frac{\partial^2p}{\partial x_i\partial x_j} + \mathcal{O}(l^3) \right.\\
+&\left.\qquad\qquad\qquad\qquad -\Dt\Dpartial{p}{t} + \mathcal{O}(\Dt^2) \right]
+\end{split}
+\end{equation}
+Using following properties and canceling out $p(\vx,t)$ term,
+\begin{equation}
+\int d\vn = 2\pi \qquad \int\vn d\vn = 0 \qquad \int n_in_j d\vn = \pi \delta_{ij}
+\end{equation}
+we have 2D diffusion equation:
+\begin{equation}
+\begin{split}
+\frac{l^2}{4}\nabla^2p - &\Dt\Dpartial{p}{t} + \mathcal{O}(l^3) +\mathcal{O}(\Dt^2) = 0\\
+\Dpartial{p}{t}(\vx,t) &= \frac{l^2}{4\Dt}\nabla^2p(\vx,t) + \mathcal{O}(l^3) +\mathcal{O}(\Dt)\\
+&\simeq D\nabla^2p(\vx,t)
+\end{split}
+\end{equation}
+
+\subsection*{Analytic solution, sensitivity of PDE}
+\begin{equation}
+\begin{split}
+p(\vx,t) &= \frac{1}{4\pi Dt}\exp\left[ -\frac{\vert\vx\vert^2}{4Dt} \right]\\
+\cJ &= \frac{1}{T}\int_0^T\iint \vert\vx\vert^2 p(\vx,t)W(\vx)\;d^2\vx dt = 2DT\\
+\Del{\cJ}{l} &= \frac{Tl}{\Dt}
+\end{split}
+\end{equation}
+The window function $W$ is defined such that
+\begin{equation*}
+supp\left[ p(\vx,t) \right] \subset W(\vx)\qquad\forall t\in[0,T]
+\end{equation*}
+This way we can solve the adjoint equation on the bounded domain, without changing values of QoI $\cJ$ and sensitivity $\Del{\cJ}{l}$.
+
+\subsection*{Adjoint Equation for ODE}
+For ODE-adjoint we omit the window function $W(\vx)$, for we don't need a bounded domain for ODE.
+\begin{multicols}{2}
+$\cH$ Blocks : $n=1, \cdots , N_t$
+\begin{equation*}
+\begin{split}
+\xph^n\left[ \frac{\xp^n - \xp^{n-1}}{\Dt} - \frac{l}{\Dt}\xi(\vn) \right] = 0
+\end{split}
+\end{equation*}
+Adjoint Blocks
+\begin{equation*}
+\frac{\xph^{n+1} - \xph^n}{-\Dt} = 0 \qquad :\;\delta\xp^n
+\end{equation*}
+\end{multicols}
+\begin{itemize}
+\item Final condition
+\begin{equation*}
+\frac{\xph^{N_t+1}\delta\xp^n}{\Dt} = 0
+\end{equation*}
+\item QoI functional
+\begin{equation*}
+\begin{split}
+\cJ &= \frac{1}{N_tN}\sum_{n=1}^{N_t}\sum_{p=1}^{N}\vert \xp^n \vert^2\\
+\delta \cJ &= \sum_{n=1}^{N_t}\sum_{p=1}^{N} \frac{2\xp^n\cdot \delta\xp^n}{N_tN}\\
+\end{split}
+\end{equation*}
+\item Sensitivity term
+\begin{equation*}
+\sum_{n=1}^{N_t}\frac{\xph^{n}\xi(\vn)}{-\Dt}\delta l
+\end{equation*}
+\end{itemize}
+
+\subsection*{Adjoint Equation for PDE}
+
+\begin{multicols}{2}
+$\cH$ Blocks 
+\begin{equation*}
+\hat{p}\left[ \Dpartial{p}{t} - D\nabla^2p \right] = 0
+\end{equation*}
+Adjoint Blocks
+\begin{equation*}
+-\Dpartial{\hat{p}}{t} - D\nabla^2\hat{p} = 0 \qquad :\;\delta p
+\end{equation*}
+\end{multicols}
+
+\begin{itemize}
+\item Final condition
+\begin{equation*}
+\hat{p}(\vx,t=T) = 0
+\end{equation*}
+\item QoI functional
+\begin{equation*}
+\begin{split}
+\cJ &= \frac{1}{T}\int_0^T\iint d^2\vx dt\; \vert \vx \vert^2 p(\vx,t)W(\vx) \\
+\delta \cJ &= \int_0^T\iint d^2\vx dt\; \frac{\vert \vx \vert^2}{T}W(\vx)\delta p
+\end{split}
+\end{equation*}
+\item Sensitivity term
+\begin{equation*}
+-\int_0^T\iint d^2\vx dt\; \hat{p}\nabla^2 p\Dpartial{D}{l}\delta l
+\end{equation*}
+\end{itemize}
+
+\subsection*{Calculation of adjoint PDE}
+\begin{itemize}
+\item Governing PDE
+\begin{equation}
+-\Dpartial{\hat{p}}{t} - D\nabla^2\hat{p} = \frac{\vert \vx\vert^2}{T}W(\vx)
+\end{equation}
+\item Calculation of source(sink) term\\
+We define $W(\vx)$
+\begin{equation}
+W(\vx) = 1\qquad\qquad \vx\in[-X_0,X_0]\times[-Y_0,Y_0]
+\end{equation}
+Considering $\hat{p}$ as mass density, the mass increase by source term during $\Dt$ is
+\begin{equation*}
+\iint_W dxdy\; \frac{x^2+y^2}{T}\Dt = \frac{4}{3}\frac{\Dt}{T}X_0Y_0
+\end{equation*}
+\item Reverse-derivation unto ODE form
+\end{itemize}
+
+\printbibliography
+
+\end{document}
