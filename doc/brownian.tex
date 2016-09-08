@@ -107,13 +107,16 @@
 
 \newcommand{\vph}{\hat{v}_p}
 \newcommand{\xph}{\hat{x}_p}
+\newcommand{\ph}{\hat{p}}
 \newcommand{\Eh}{\hat{E}}
 \newcommand{\phih}{\hat{\phi}}
 
+\newcommand{\inprod}[2]{\left\langle#1,#2\right\rangle}
 \newcommand{\cH}{\mathcal{H}}
 \newcommand{\cJ}{\mathcal{J}}
 \newcommand{\cL}{\mathcal{L}}
-\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cB}{\mathcal{B}}
 
 \newcommand{\timesum}{\sum\limits_{n=0}^{N_t-1}}
 \newcommand{\particlesum}{\sum\limits_{p=1}^{N}}
@@ -166,7 +169,8 @@
 
 \subsection*{Goal}
 Brownian motion is essentially stochastic, but when we fix the random seed the numerical simulation can be pseudo-deterministic, not exhibiting chaos.
-Adjoint-particle formulation for such dynamics can be a good practice, a good starting point to define adjoint-particle formulation.
+Adjoint-particle formulation for such dynamics can be a good practice, a good starting point to define adjoint-particle formulation,
+as well as to examine its statistical accuracy.
 
 \subsection*{Governing equation}
 \begin{itemize}
@@ -205,7 +209,7 @@ Using following properties and canceling out $p(\vx,t)$ term,
 \begin{equation}
 \int d\vn = 2\pi \qquad \int\vn d\vn = 0 \qquad \int n_in_j d\vn = \pi \delta_{ij}
 \end{equation}
-we have 2D diffusion equation:
+in the leading order we have 2D diffusion equation:
 \begin{equation}
 \begin{split}
 \frac{l^2}{4}\nabla^2p - &\Dt\Dpartial{p}{t} + \mathcal{O}(l^3) +\mathcal{O}(\Dt^2) = 0\\
@@ -230,6 +234,7 @@ This way we can solve the adjoint equation on the bounded domain, without changi
 
 \subsection*{Adjoint Equation for ODE}
 For ODE-adjoint we omit the window function $W(\vx)$, for we don't need a bounded domain for ODE.
+For the details of adjoint formulation, see Appendix \ref{app1}.
 \begin{multicols}{2}
 $\cH$ Blocks : $n=1, \cdots , N_t$
 \begin{equation*}
@@ -261,7 +266,7 @@ Adjoint Blocks
 \end{itemize}
 
 \subsection*{Adjoint Equation for PDE}
-
+For the details of adjoint formulation, see Appendix \ref{app2}.
 \begin{multicols}{2}
 $\cH$ Blocks 
 \begin{equation*}
@@ -295,18 +300,189 @@ Adjoint Blocks
 \begin{itemize}
 \item Governing PDE
 \begin{equation}
--\Dpartial{\hat{p}}{t} - D\nabla^2\hat{p} = \frac{\vert \vx\vert^2}{T}W(\vx)
+-\Dpartial{\hat{p}}{t} = D\nabla^2\hat{p} - \frac{\vert \vx\vert^2}{T}W(\vx)
 \end{equation}
 \item Calculation of source(sink) term\\
 We define $W(\vx)$
 \begin{equation}
-W(\vx) = 1\qquad\qquad \vx\in[-X_0,X_0]\times[-Y_0,Y_0]
+W(\vx) = 1\qquad\qquad \vx = (r,\theta)\in[0,W]\times[0,2\pi]
 \end{equation}
 Considering $\hat{p}$ as mass density, the mass increase by source term during $\Dt$ is
 \begin{equation*}
-\iint_W dxdy\; \frac{x^2+y^2}{T}\Dt = \frac{4}{3}\frac{\Dt}{T}X_0Y_0
+-\iint_W drd\theta\; \frac{r^2}{T}\Dt = -\iint_Wdrd\theta\;f(r,\theta) = -\frac{\pi W^4}{2T}\Dt = Z
 \end{equation*}
-\item Reverse-derivation unto ODE form
+We decompose $f(r,\theta)=f(r)$ into two parts:
+\begin{equation}
+f(r) = \alpha(r)\cdot p(r) \simeq \sum_p^{N_p} \frac{\alpha(r_p)}{N_p}\delta(r-r_p)
+\end{equation}
+where pdf $p(r)$ is approximated by a Monte-Carlo sampling $\{r_p\}$,
+while $\alpha(r)$ has a role of weighting the particles depending on their positions.
+Currently there are two options to choose $\alpha$ and $p$:
+\begin{itemize}
+\item Uniform, constant $\alpha$
+\begin{equation*}
+\alpha(r) = Z\qquad\qquad p(r) = \frac{4}{W^4}r^3\simeq\sum_p^{N_p}\frac{1}{N_p}\delta(r-r_p)
+\end{equation*}
+\item Non-uniform, time-varying $\alpha$
+\begin{equation*}
+\alpha(r) = Z\frac{2r^2}{W^2}\qquad\qquad p(r) = \frac{2}{W^2}r\simeq\sum_p^{N_p(t)}\frac{1}{N_p(t)}\delta(r-r_p)
+\end{equation*}
+\end{itemize}
+\item Reverse-derivation unto ODE form\\
+We can deduce an ODE form by tracking the derivation of PDE backward:
+\begin{equation}
+\ph(\vx,t) = \int d\vn\; \frac{1}{2\pi}\cdot \ph(\vx - l\vn, t+\Dt) - \frac{\Dt}{T}\vert\vx\vert^2W(\vx)\\
+\end{equation}
+The first term in right-hand side represents random-walk backward in time,
+and the second term sink of particles (backward in time).
+In this way we can construct a similar numerical method for adjoint equation.
+However, the adjoint equation can be discretized in various ways.
+\end{itemize}
+
+\appendix
+\subsection{Adjoint Formulation for ODE}
+\label{app1}
+We define an inner product on the particle configuration space,
+\begin{equation}
+\inprod{\{\xph\}}{\{\xp\}} = \sum_{n=1}^{N_t}\sum_{p=1}^{N_p}\xph^n\cdot\xp^n
+\label{e:inprod}
+\end{equation}
+The governing equation for $\xp$ is,
+\begin{equation}
+\cL[\xp] - \cF[l] = \frac{\xp^{n} - \xp^{n-1}}{\Dt} - \frac{l}{\Dt}\xi_p^n(\vn) = 0
+\end{equation}
+where $\xi_p^n$ is a uniformly-random unit vector.
+Now based on (\ref{e:inprod}) we define a constraint functional $\cH$:
+\begin{equation}
+\cH = \inprod{\xph}{\cL[\xp] - \cF[l]} = 0
+\label{e:H1}
+\end{equation}
+where we simplify $\{\xp\} = \xp$ (same for $\xph$).\\
+For a sensitivity problem, we have following QoI functional:
+\begin{equation}
+\begin{split}
+\cJ &= \frac{1}{N_pN_t}\sum_{n=1}^{N_t}\sum_{p=1}^{N_p}\vert \xp^n\vert^2\\
+&\equiv \cJ + \cH
+\label{e:J1}
+\end{split}
+\end{equation}
+Note that adding $\cH$ doesn't change the value of $\cJ$.
+The sensitivity of $\cJ$ to $l$, i.e. $\delta\cJ/\delta l$ can be expressed as dual problem using the constraint $\cH$:
+\begin{equation}
+\begin{split}
+\Del{\cJ}{l} &= \Del{\cJ}{l} + \Del{\cH}{l} = \inprod{g[\xp]}{\Dpartial{\xp}{l}} + \inprod{\xph}{\cL\left[\Dpartial{\xp}{l}\right] + \Dpartial{\cF}{l}}\\
+&= \inprod{\xph}{\Dpartial{\cF}{l}} + \inprod{g+\cL^*[\xph]}{\Dpartial{\xp}{l}} + \cB[\xph]\Dpartial{\xp}{l}\bigg|_{N_t}\\
+&= \inprod{\xph}{\Dpartial{\cF}{l}} + \cH^*
+\end{split}
+\end{equation}
+where $g[\xp] = \xp^n/N_tN_p$.
+Now we have a new adjoint constraint functional $\cH^*$ which consists of governing equation and its boundary (final) condition $\cB$.
+As long as $\cH^*\equiv0$, we can compute sensitivity using the dual (adjoint) variable $\xph$,
+without computing $\partial \xp/\partial l$.
+The only thing remain here is to calculate the inner products precisely:
+\begin{itemize}
+\item The adjoint operator, final condition
+\begin{equation*}
+\begin{split}
+\inprod{\xph}{\cL\left[\Dpartial{\xp}{l}\right]} &= \sum_{n=1}^{N_t}\sum_{p=1}^{N_p}\xph^n\left[ \frac{\partial\xp^n/\partial l - \partial\xp^{n-1}/\partial l}{\Dt} \right]\\
+&= \sum_{n=1}^{N_t}\sum_{p=1}^{N_p}\left[ -\frac{\xph^{n+1} - \xph^n}{\Dt} \right]\Dpartial{\xp^n}{l} + \frac{\xph^{N_t+1}}{\Dt}\Dpartial{\xp^{N_t}}{l}\\
+&= \inprod{\cL^*[\xph]}{\Dpartial{\xp}{l}} + \cB[\xph]\Dpartial{\xp}{l}\bigg|_{N_t}
+\end{split}
+\end{equation*}
+\item Sensitivity term
+\begin{equation*}
+\inprod{\xph}{\Dpartial{\cF}{l}} = - \sum_{n=1}^{N_t}\sum_{p=1}^{N_p}\frac{\xph^n}{\Dt}\xi_p^n(\vn)
+\end{equation*}
+Thus we need to store those random vectors $\xi_p^n$ to compute discrete-exact sensitivity.
+\end{itemize}
+
+\subsection{Adjoint Formulation for PDE}
+\label{app2}
+We define an inner product on the pdf space, (although the space is not precisely defined yet)
+\begin{equation}
+\inprod{\hat{p}}{p} = \iint \hat{p}(\vx,t)\cdot p(\vx,t) d^2\vx dt
+\label{e:innerproduct}
+\end{equation}
+where the domain of the integral is $(\vx,t)\in[-\infty,\infty]^2\times[0,T]$.\\
+The governing equation for $p(\vx,t)$ is,
+\begin{equation}
+\cL[p;D] = \Dpartial{p}{t} - D\nabla^2p = 0
+\end{equation}
+where $D = l^2/4\Dt$.
+Now based on (\ref{e:innerproduct}) we define a constraint functional $\cH$:
+\begin{equation}
+\cH = \inprod{\hat{p}}{\cL[p;D]} = 0
+\label{e:H}
+\end{equation}
+For a sensitivity problem, we have following QoI functional:
+\begin{equation}
+\begin{split}
+\cJ &= \frac{1}{T}\iint \vert\vx\vert^2W(\vx)\cdot p(\vx,t) d^2\vx dt\\
+&= \inprod{g(\vx,t)}{p(\vx,t)}\\
+&= \inprod{g(\vx,t)}{p(\vx,t)} + \cH
+\label{e:J}
+\end{split}
+\end{equation}
+where $g(\vx,t) = \vert\vx\vert^2W(\vx)/T$, and $W(\vx)$ is a window function.
+Note that adding $\cH$ doesn't change the value of $\cJ$.\\
+The sensitivity of $\cJ$ to $l$, i.e. $\delta\cJ/\delta l$ can be expressed as dual problem using the constraint $\cH$:
+\begin{equation}
+\begin{split}
+\Del{\cJ}{l} &= \inprod{g}{\Dpartial{p}{l}} + \Del{\cH}{l} = \inprod{g}{\Dpartial{p}{l}} + \inprod{\ph}{\Dpartial{\cL}{p}\Dpartial{p}{l} + \Dpartial{\cL}{D}\Dpartial{D}{l}}\\
+&= \inprod{\ph}{\Dpartial{\cL}{D}\Dpartial{D}{l}} + \inprod{g+\Dpartial{\cL}{p}^*[\ph;D]}{\Dpartial{p}{l}}\\
+&= \inprod{\ph}{\Dpartial{\cL}{D}\Dpartial{D}{l}} + \cH^*
+\end{split}
+\end{equation}
+Now we have a new adjoint constraint functional $\cH^*$.
+As long as $\cH^*\equiv0$, we can compute sensitivity using the dual (adjoint) variable $\ph$,
+without computing $\partial p/\partial l$.
+The only thing remain here is to calculate the inner products precisely:
+\begin{itemize}
+\item The constraint $\cH^*$\\
+First, the partial derivative of the operator $\cL[p;D]$ is,
+\begin{equation*}
+\begin{split}
+\Dpartial{}{p}\cL[p;D] &= \Dpartial{}{p}\left[ \Dpartial{p}{t} - D\nabla^2p \right]\\
+&= \Dpartial{}{t} - D\nabla^2
+\end{split}
+\end{equation*}
+Then we obtain the adjoint operator for $\partial\cL/\partial p$:
+\begin{equation*}
+\begin{split}
+\inprod{\ph}{\Dpartial{\cL}{p}\Dpartial{p}{l}} &= \iint \ph\left[ \Dpartial{}{t}\Dpartial{p}{l} - D\nabla^2\Dpartial{p}{l} \right] d^2\vx dt\\
+&= \iint \left[ -\Dpartial{\ph}{t} - D\nabla^2\ph \right]\Dpartial{p}{l} d^2\vx dt\\
+&= \inprod{\Dpartial{\cL}{p}^*[\ph;D]}{\Dpartial{p}{l}}
+\end{split}
+\end{equation*}
+In this problem we don't need to care about boundary condition for $\ph$.
+However, in general final/boundary condition for adjoint variables should be handled in this step.\\
+Finally, the adjoint constraint is:
+\begin{equation*}
+\begin{split}
+\cH &= \inprod{g+\Dpartial{\cL}{p}^*[\ph;D]}{\Dpartial{p}{l}} = 0\\
+&= \iint \left[ g(\vx,t) -\Dpartial{\ph}{t} - D\nabla^2\ph \right]\Dpartial{p}{l} d^2\vx dt\\
+\end{split}
+\end{equation*}
+From which we obtain the adjoint equation:
+\begin{equation}
+g(\vx,t) - \Dpartial{\ph}{t} - D\nabla^2\ph = 0
+\end{equation}
+\item Sensitivity term\\
+Having $\cH^*=0$, the remaining inner product becomes the sensitivity:
+\begin{equation*}
+\inprod{\ph}{\Dpartial{\cL}{D}\Dpartial{D}{l}}
+\end{equation*}
+where the partial derivative of operator $\cL[p;D]$ is,
+\begin{equation*}
+\begin{split}
+\Dpartial{}{D}\cL[p;D] &= \Dpartial{}{D}\left[ \Dpartial{p}{t} - D\nabla^2p \right]\\
+&= -\nabla^2p
+\end{split}
+\end{equation*}
+Thus the sensitivity term is:
+\begin{equation}
+\inprod{\ph}{\Dpartial{\cL}{D}\Dpartial{D}{l}} = -\iint \ph\nabla^2p\Dpartial{D}{l} d^2\vx dt
+\end{equation}
 \end{itemize}
 
 \printbibliography
