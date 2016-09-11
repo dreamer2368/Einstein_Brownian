@@ -3,7 +3,8 @@ import scipy as np
 from Brownian import *
 from adjoint import *
 from Integrator import *
-            
+from fmesh import *
+
 class QoI(object):
     
     def __init__(self,N,Nt):

@@ -8,3 +8,8 @@
 *.out
 *.xml
 *.pdf
+build/*
+*.cpp
+*.mod
+*.o
+*.so
