@@ -1,23 +1,26 @@
 import numpy as np
 import scipy as np
 
-class Brownian(object):
-
+class particle(object):
     dtype = np.double
-
-    def __init__(self,N,l,dt,
-                        x0=None,y0=None):
-
+    
+    def __init__(self,N,dt,
+                 x0=None,y0=None):
         self.N = N
-        self.l = l
         self.dt = dt
-
         self.x, self.y = x0, y0
         if x0 is None:
             self.x = np.zeros(N, dtype=self.dtype)
         if y0 is None:
             self.y = np.zeros(N, dtype=self.dtype)
-            
+
+class Brownian(particle):
+    dtype = np.double
+
+    def __init__(self,N,l,dt,
+                        x0=None,y0=None):
+        particle.__init__(self,N,dt,x0,y0)
+        self.l = l
         self.theta = np.zeros(N, dtype=self.dtype)
         
     def getTheta(self):
