@@ -27,10 +27,10 @@ contains
 			g(:,1) = (/xg,xg+1/) + Ng
 			g(:,2) = (/yg,yg+1/) + Ng
 			f = spwt(i)
-			f(1,:) = f(1,:)*(1.0d0-x(i)+xg*dx)
-			f(2,:) = f(2,:)*(x(i)-xg*dx)
-			f(:,1) = f(:,1)*(1.0d0-y(i)+yg*dx)
-			f(:,2) = f(:,2)*(y(i)-yg*dx)
+			f(1,:) = f(1,:)*( 1.0d0 - (x(i)/dx-xg) )
+			f(2,:) = f(2,:)*(x(i)/dx-xg)
+			f(:,1) = f(:,1)*( 1.0d0 - (y(i)/dx-yg) )
+			f(:,2) = f(:,2)*(y(i)/dx-yg)
 			pg(g(:,1),g(:,2)) = pg(g(:,1),g(:,2)) + f
 		end do
 		pg = pg/dx
