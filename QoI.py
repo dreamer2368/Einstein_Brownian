@@ -47,17 +47,19 @@ class QoI(object):
         
     def compute_dJdA_pdf(self,AdjBrownian,TimeIntegrator,n):
         W = 6.
-        Ng = 32
+        Ng = 16
         dx = W/Ng
-        qmesh = mesh(Ng,W)
+        qmesh = mesh(Ng,W,W)
         #original/adjoint pdf
         pg = qmesh.ptc2pdf(TimeIntegrator.xData[n,:],TimeIntegrator.yData[n,:])
         pg_hat = qmesh.ptc2pdf(AdjBrownian.x,AdjBrownian.y,AdjBrownian.spwt)
         #Gradients of pg
         pg_dx, pg_dy = qmesh.pdfgrad(pg)
+        pg_dx, pg_dy = np.asarray(pg_dx), np.asarray(pg_dy)
         #Gradients of pg_hat
         pg_hat_dx, pg_hat_dy = qmesh.pdfgrad(pg_hat)
-        self.dJdA += AdjBrownian.l/2.*np.sum( pg_dx*pg_hat_dx + pg_dy*pg_hat_dy )
+        pg_hat_dx, pg_hat_dy = np.asarray(pg_hat_dx), np.asarray(pg_hat_dy)
+        self.dJdA += AdjBrownian.l/2.*np.sum( pg_dx*pg_hat_dx + pg_dy*pg_hat_dy )*dx*dx
 
 def dJ_pdf_vw(self,n):
     #radius of window function
